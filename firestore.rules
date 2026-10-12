@@ -1,0 +1,74 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    // Read-only exercise library for authenticated users
+    match /exercises/{id} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // Friend Codes (No client access at all — Cloud Functions authority only)
+    match /friendCodes/{code} {
+      allow read, write: if false;
+    }
+
+    // User Profile Document
+    match /users/{uid} {
+      allow read: if request.auth.uid == uid;
+      
+      // Users can edit profile/settings, NEVER xp, level, rank, stats, streak, title, weekly, or friendCode directly!
+      allow update: if request.auth.uid == uid
+        && !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['xp', 'level', 'rank', 'stats', 'streak', 'title', 'weekly', 'friendCode']);
+            
+      allow create: if request.auth.uid == uid;
+
+      // Friends Subcollection (Owner-read only, Cloud Function write authority)
+      match /friends/{friendUid} {
+        allow read: if request.auth.uid == uid;
+        allow write: if false;
+      }
+
+      // Workouts Subcollection
+      match /workouts/{id} {
+        allow read: if request.auth.uid == uid;
+        // User creates workout with validated: false. Server Cloud Function validates and writes XP
+        allow create: if request.auth.uid == uid
+          && request.resource.data.validated == false;
+        allow update, delete: if false;
+      }
+
+      // Daily Quests Subcollection (Server Cloud Function Authority)
+      match /dailyQuests/{id} {
+        allow read: if request.auth.uid == uid;
+        allow write: if false; // Server-side Cloud Functions only
+      }
+
+      // Personal Records Subcollection
+      match /personalRecords/{id} {
+        allow read: if request.auth.uid == uid;
+        allow write: if false; // Server-side Cloud Functions only
+      }
+
+      // Body Metrics Subcollection
+      match /bodyMetrics/{id} {
+        allow read, write: if request.auth.uid == uid;
+      }
+
+      // Rank Trials Subcollection
+      match /trials/{id} {
+        allow read: if request.auth.uid == uid;
+        allow create: if request.auth.uid == uid;
+        allow update: if false; // Cloud Function authority
+      }
+
+      // Health Days Subcollection (server-written, owner-readable)
+      match /healthDays/{date} {
+        allow read: if request.auth.uid == uid;
+        allow write: if false; // Cloud Function (syncHealthDay) only
+      }
+    }
+  }
+}
+

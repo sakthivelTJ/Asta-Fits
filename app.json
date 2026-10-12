@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "Asta Fit",
+    "slug": "astas-fit",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": false,
+    "icon": "./assets/icon.png",
+    "splash": {
+      "backgroundColor": "#0A0D14"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "icon": "./assets/icon.png"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0A0D14"
+      },
+      "package": "com.astasfit.hunterapp",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Asta's Fit to access your camera for AI pose estimation and push-up rep tracking."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
+      ],
+      "expo-asset",
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "20300e61-7b3e-406c-ae97-8511195a7812"
+      }
+    }
+  }
+}

@@ -1,0 +1,46 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test:
+    name: Run Unit, E2E & Firestore Rules Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install Root Dependencies
+        run: npm ci || npm install
+
+      - name: Run Client & Domain Unit Tests
+        run: npx jest src/
+
+      - name: Run Firestore Rules Tests
+        run: npx jest rules-tests/
+
+      - name: Install Cloud Functions Dependencies
+        run: |
+          cd functions
+          npm ci || npm install
+
+      - name: Run Cloud Functions Tests
+        run: |
+          cd functions
+          npm test
+
+      - name: Build Cloud Functions TypeScript
+        run: |
+          cd functions
+          npm run build
