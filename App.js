@@ -34,7 +34,7 @@ import { BottomNav } from './src/components/BottomNav';
 import { FloatingAiBot } from './src/components/FloatingAiBot';
 import { COLORS } from './src/theme/colors';
 
-function MainNavigator() {
+function MainNavigator({ isFontReady }) {
   const { user, isLoading, dailyQuests } = useHunter();
   const [activeTab, setActiveTab] = useState('home');
   const [tabHistory, setTabHistory] = useState(['home']);
@@ -158,7 +158,7 @@ function MainNavigator() {
   }
 
   // 1. Initial State / App Loading Preloader (1.5s minimum delay, with 3s max safety timeout)
-  const isStillLoadingData = isLoading || hasSeenIntro === null;
+  const isStillLoadingData = isLoading || hasSeenIntro === null || !isFontReady;
   const shouldShowPreloader = !maxSafetyDone && (!minDelayDone || isStillLoadingData);
 
   if (shouldShowPreloader) {
@@ -309,12 +309,16 @@ function MainNavigator() {
 }
 
 export default function App() {
-  useFonts(Ionicons.font);
+  const [fontsLoaded] = useFonts({
+    ionicons: require('./assets/fonts/Ionicons.ttf'),
+    Ionicons: require('./assets/fonts/Ionicons.ttf'),
+    ...Ionicons.font,
+  });
 
   return (
     <HunterProvider>
       <StatusBar style="light" backgroundColor={COLORS.background} />
-      <MainNavigator />
+      <MainNavigator isFontReady={fontsLoaded} />
     </HunterProvider>
   );
 }

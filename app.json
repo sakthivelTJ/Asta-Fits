@@ -26,6 +26,15 @@
       ]
     },
     "plugins": [
+      "./plugins/withIonicons",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Ionicons.ttf"
+          ]
+        }
+      ],
       [
         "expo-camera",
         {
@@ -40,8 +49,7 @@
           }
         }
       ],
-      "expo-asset",
-      "expo-font"
+      "expo-asset"
     ],
     "extra": {
       "eas": {
