@@ -40,6 +40,24 @@ function MainNavigator() {
   const [tabHistory, setTabHistory] = useState(['home']);
   const [hasSeenIntro, setHasSeenIntro] = useState(null); // null = checking, false = needs video, true = done
   const [isPreviewingPreloader, setIsPreviewingPreloader] = useState(false);
+  const [minDelayDone, setMinDelayDone] = useState(false);
+  const [maxSafetyDone, setMaxSafetyDone] = useState(false);
+
+  // Intentional 1.5-second preloader display timer
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMinDelayDone(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Hard safety timeout: under no circumstance show preloader for > 3.0 seconds
+  useEffect(() => {
+    const safetyTimer = setTimeout(() => {
+      setMaxSafetyDone(true);
+    }, 3000);
+    return () => clearTimeout(safetyTimer);
+  }, []);
 
   // Sub-screen overlays
   const [subScreen, setSubScreen] = useState(null); // 'quest_detail', 'summary', 'rank_trial', 'penalty', 'settings', 'library', 'social'
@@ -139,9 +157,12 @@ function MainNavigator() {
     );
   }
 
-  // 1. Initial State / App Loading
-  if (isLoading || hasSeenIntro === null) {
-    return <ThemedPreloader fullScreen={true} showProgress={true} duration={1800} />;
+  // 1. Initial State / App Loading Preloader (1.5s minimum delay, with 3s max safety timeout)
+  const isStillLoadingData = isLoading || hasSeenIntro === null;
+  const shouldShowPreloader = !maxSafetyDone && (!minDelayDone || isStillLoadingData);
+
+  if (shouldShowPreloader) {
+    return <ThemedPreloader fullScreen={true} showProgress={true} duration={1500} />;
   }
 
   // 2. One-Time First Launch Intro Video
@@ -288,27 +309,7 @@ function MainNavigator() {
 }
 
 export default function App() {
-  const [fontsLoaded] = useFonts({
-    ...Ionicons.font,
-    Ionicons: require('@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf'),
-  });
-  const [minPreloaderDone, setMinPreloaderDone] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMinPreloaderDone(true);
-    }, 1800);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (!fontsLoaded || !minPreloaderDone) {
-    return (
-      <View style={styles.container}>
-        <StatusBar style="light" backgroundColor={COLORS.background} />
-        <ThemedPreloader fullScreen={true} showProgress={true} duration={1800} />
-      </View>
-    );
-  }
+  useFonts(Ionicons.font);
 
   return (
     <HunterProvider>
